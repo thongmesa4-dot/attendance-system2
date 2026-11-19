@@ -1,0 +1,1974 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#4338ca">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="វត្តមានសិស្ស">
+    <title>ប្រព័ន្ធស្រង់វត្តមានសិស្ស (Admin &amp; Teacher Attendance System)</title>
+    <!-- PWA Inline Manifest & Icon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234338ca'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle' fill='white'%3E🎓%3C/text%3E%3C/svg%3E">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234338ca'/%3E%3Ctext x='50' y='66' font-size='54' text-anchor='middle' fill='white'%3E🎓%3C/text%3E%3C/svg%3E">
+    <link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22%E1%9E%94%E1%9F%92%E1%9E%9A%E1%9E%96%E1%9F%90%E1%9E%93%E1%9F%92%E1%9E%92%E1%9E%9F%E1%9F%92%E1%9E%9A%E1%9E%84%E1%9F%8B%E1%9E%9C%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%98%E1%9E%B6%E1%9E%93%E1%9E%9F%E1%9E%B7%E1%9E%9F%E1%9F%92%E1%9E%9F%22%2C%22short_name%22%3A%22%E1%9E%9C%E1%9E%8F%E1%9F%92%E1%9E%8F%E1%9E%98%E1%9E%B6%E1%9E%93%E1%9E%9F%E1%9E%B7%E1%9E%9F%E1%9F%92%E1%9E%9F%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f1f5f9%22%2C%22theme_color%22%3A%22%234338ca%22%7D">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Font: Khmer OS Battambang -->
+    <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@300;400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Battambang', sans-serif;
+            background-color: #f1f5f9;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col justify-between">
+
+    <!-- TOAST NOTIFICATION -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none no-print"></div>
+
+    <!-- HEADER / NAVIGATION -->
+    <header class="bg-indigo-700 text-white shadow-md no-print">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl font-bold">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold">ប្រព័ន្ធស្រង់វត្តមានសិស្ស</h1>
+                    <p class="text-xs text-indigo-200">Admin គ្រប់គ្រងបញ្ជីសិស្សរួម • គ្រូមុខវិជ្ជាស្រង់វត្តមានភ្លាមៗ</p>
+                </div>
+            </div>
+
+            <div id="user-info-section" class="hidden flex flex-wrap items-center justify-center gap-2">
+                <span id="role-badge" class="text-xs font-bold px-2.5 py-1 rounded-lg uppercase tracking-wide"></span>
+                <span id="teacher-display-name" class="text-xs sm:text-sm font-medium bg-indigo-800 px-3 py-1.5 rounded-lg border border-indigo-600"></span>
+                <button onclick="openBackupModal()" title="បម្រុងទុក ឬផ្ទេរទិន្នន័យ (Backup / Sync)" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs sm:text-sm font-bold transition border border-indigo-400/50 flex items-center gap-1.5">
+                    <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden md:inline">Backup/ផ្ទេរទិន្នន័យ</span>
+                </button>
+                <button onclick="handleLogout()" class="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs sm:text-sm font-bold transition shadow-sm flex items-center gap-1.5">
+                    <i class="fa-solid fa-right-from-bracket"></i> ចាកចេញ
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-6 w-full flex-grow">
+
+        <!-- AUTH SECTION (LOGIN / REGISTER) -->
+        <section id="auth-section" class="max-w-md mx-auto bg-white rounded-2xl shadow-xl border border-slate-100 overflow-hidden my-6">
+            <div class="bg-indigo-600 p-6 text-white text-center">
+                <h2 id="auth-form-title" class="text-xl font-bold">ចូលប្រើប្រាស់ប្រព័ន្ធ</h2>
+                <p class="text-xs text-indigo-100 mt-1">Admin វាយបញ្ចូលឈ្មោះសិស្សរួម • គ្រូមុខវិជ្ជាចូលស្រង់វត្តមាន</p>
+            </div>
+
+            <div class="p-6 space-y-4">
+                <!-- Toggle Tabs -->
+                <div class="flex bg-slate-100 p-1 rounded-xl mb-2 text-sm font-bold">
+                    <button id="tab-login-btn" onclick="switchAuthTab('login')" class="flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition">ចូលគណនី</button>
+                    <button id="tab-register-btn" onclick="switchAuthTab('register')" class="flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-800 transition">បង្កើតគណនីថ្មី</button>
+                </div>
+
+                <div id="register-fields" class="space-y-3 hidden">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">តួនាទីក្នុងប្រព័ន្ធ (Role)</label>
+                        <select id="reg-role" onchange="onRegRoleChange()" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm font-bold text-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="teacher">គ្រូមុខវិជ្ជា (ស្រង់វត្តមានលើបញ្ជីសិស្សរួម)</option>
+                            <option value="admin">អ្នកគ្រប់គ្រង (Admin - បង្កើតថ្នាក់ &amp; វាយឈ្មោះសិស្សរួម)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 mb-1">ឈ្មោះអ្នកប្រើប្រាស់</label>
+                        <input type="text" id="reg-name" placeholder="ឧ. លោកគ្រូ សុខ ជា ឬ Admin សាលា" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                    <div id="reg-subject-wrapper">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">មុខវិជ្ជាបង្រៀន</label>
+                        <input type="text" id="reg-subject" placeholder="ឧ. គណិតវិទ្យា, រូបវិទ្យា, ភាសាខ្មែរ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">អ៊ីមែល (Email)</label>
+                    <input type="email" id="auth-email" placeholder="example@school.edu.kh" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ពាក្យសម្ងាត់ (Password)</label>
+                    <input type="password" id="auth-password" placeholder="••••••••" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+
+                <button id="auth-submit-btn" onclick="handleAuthSubmit()" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md transition">
+                    ចូលគណនី
+                </button>
+
+                <div class="relative flex py-1.5 items-center">
+                    <div class="flex-grow border-t border-slate-200"></div>
+                    <span class="flex-shrink mx-3 text-slate-400 text-xs">ចូលសាកល្បងរហ័ស (Demo)</span>
+                    <div class="flex-grow border-t border-slate-200"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <button onclick="handleDemoLogin('admin')" class="py-2.5 px-3 bg-amber-50 hover:bg-amber-100 text-amber-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 border border-amber-200">
+                        <i class="fa-solid fa-user-shield text-amber-600"></i> ចូលជា Admin (វាយឈ្មោះសិស្ស)
+                    </button>
+                    <button onclick="handleDemoLogin('teacher')" class="py-2.5 px-3 bg-indigo-50 hover:bg-indigo-100 text-indigo-800 rounded-xl font-bold text-xs transition flex items-center justify-center gap-2 border border-indigo-200">
+                        <i class="fa-solid fa-chalkboard-user text-indigo-600"></i> ចូលជា គ្រូមុខវិជ្ជា (ស្រង់វត្តមាន)
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- DASHBOARD SECTION (CLASSES & ATTENDANCE) -->
+        <section id="dashboard-section" class="hidden space-y-6">
+
+            <!-- TOP CONTROLS: CLASS SELECTION & ACTIONS -->
+            <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                <div class="flex flex-wrap items-end gap-2.5">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">ជ្រើសរើសថ្នាក់រៀន (បញ្ជីរួម)</label>
+                        <select id="class-selector" onchange="onClassChange()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none min-w-[210px]">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <!-- Admin-only Class Controls -->
+                    <div id="admin-class-controls" class="hidden flex items-center gap-2">
+                        <button onclick="openAddClassModal()" class="px-3.5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl text-sm font-bold transition flex items-center gap-1.5 shadow-xs">
+                            <i class="fa-solid fa-plus"></i> បង្កើតថ្នាក់ថ្មី
+                        </button>
+                        <button onclick="deleteCurrentClass()" title="លុបថ្នាក់បច្ចុប្បន្ន" class="px-3 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 rounded-xl text-sm font-bold transition border border-rose-200">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- TABS NAVIGATION -->
+                <div class="flex flex-wrap bg-slate-100 p-1.5 rounded-xl gap-1 text-xs sm:text-sm font-bold">
+                    <button onclick="switchTab('attendance')" id="nav-tab-attendance" class="px-3.5 py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition">ស្រង់វត្តមាន</button>
+                    <button onclick="switchTab('students')" id="nav-tab-students" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">បញ្ជីសិស្សរួម</button>
+                    <button onclick="switchTab('monthly')" id="nav-tab-monthly" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">១ ខែ</button>
+                    <button onclick="switchTab('trimester')" id="nav-tab-trimester" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">ត្រីមាស</button>
+                    <button onclick="switchTab('semester')" id="nav-tab-semester" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">ឆមាស</button>
+                    <button onclick="switchTab('yearly')" id="nav-tab-yearly" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">ប្រចាំឆ្នាំ</button>
+                    <button onclick="switchTab('history')" id="nav-tab-history" class="px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition">ប្រវត្តិ</button>
+                </div>
+            </div>
+
+            <!-- TAB 1: ATTENDANCE TAKING PANEL -->
+            <div id="attendance-panel" class="space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">កាលបរិច្ឆេទ</label>
+                            <input type="date" id="attendance-date" onchange="loadAttendanceForDateAndPeriod()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">ម៉ោងសិក្សា / មុខវិជ្ជា</label>
+                            <input type="text" id="attendance-period-custom" onchange="loadAttendanceForDateAndPeriod()" placeholder="ឧ. ម៉ោងទី ១ (គណិតវិទ្យា)" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none w-64">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="markAllStatus('present')" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-xs font-bold border border-emerald-200 transition">
+                            <i class="fa-solid fa-check-double"></i> វត្តមានទាំងអស់
+                        </button>
+                        <button onclick="saveAttendance()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-floppy-disk"></i> រក្សាទុកវត្តមាន
+                        </button>
+                        <button onclick="window.print()" class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-slate-200">
+                            <i class="fa-solid fa-print"></i> បោះពុម្ព
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ATTENDANCE TABLE CARD -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-4 bg-slate-50 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <div>
+                            <h3 id="current-class-title" class="font-bold text-slate-800 text-base">បញ្ជីស្រង់វត្តមានសិស្ស</h3>
+                            <p id="attendance-status-badge" class="text-xs text-indigo-600 font-semibold mt-0.5">កំពុងជ្រើសរើសថ្ងៃ និងម៉ោង</p>
+                        </div>
+                        <div id="summary-counters" class="flex flex-wrap items-center gap-2 text-xs font-bold">
+                            <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-200">វត្តមាន: <span id="count-present">0</span></span>
+                            <span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg border border-rose-200">អវត្តមាន: <span id="count-absent">0</span></span>
+                            <span class="px-2.5 py-1 bg-amber-50 text-amber-700 rounded-lg border border-amber-200">សុំច្បាប់: <span id="count-permission">0</span></span>
+                            <span class="px-2.5 py-1 bg-purple-50 text-purple-700 rounded-lg border border-purple-200">មកយឺត: <span id="count-late">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-28">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-24 text-center">ភេទ</th>
+                                    <th class="py-3 px-4 text-center min-w-[300px]">ស្ថានភាពវត្តមាន</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendance-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: SHARED STUDENTS MANAGEMENT PANEL -->
+            <div id="students-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">បញ្ជីឈ្មោះសិស្សរួមក្នុងថ្នាក់</h3>
+                        <p id="students-panel-subtitle" class="text-xs text-slate-500">Admin ជាអ្នកវាយបញ្ចូលឈ្មោះសិស្សរួម ដើម្បីឲ្យគ្រូគ្រប់មុខវិជ្ជាប្រើប្រាស់ដូចគ្នា</p>
+                    </div>
+                    <!-- Admin-only Student Action Buttons -->
+                    <div id="admin-student-actions" class="hidden flex flex-wrap items-center gap-2">
+                        <button onclick="openAddStudentModal()" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-2">
+                            <i class="fa-solid fa-user-plus"></i> បន្ថែមសិស្សថ្មី
+                        </button>
+                        <button onclick="loadDemoStudents()" class="px-4 py-2.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold transition flex items-center gap-2 border border-emerald-200">
+                            <i class="fa-solid fa-users"></i> បញ្ចូលសិស្សគំរូ (១០នាក់)
+                        </button>
+                    </div>
+                    <!-- Teacher Read-Only Notice Badge -->
+                    <div id="teacher-student-readonly-badge" class="hidden px-3.5 py-2 bg-amber-50 text-amber-800 border border-amber-200 rounded-xl text-xs font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-lock"></i> បញ្ជីឈ្មោះសិស្សរួមគ្រប់គ្រងដោយ Admin (គ្រូអាចមើល និងស្រង់វត្តមានបានភ្លាមៗ)
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-32">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-28 text-center">ភេទ</th>
+                                    <th id="students-action-col-header" class="py-3 px-4 w-36 text-center">សកម្មភាព (Admin)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: MONTHLY REPORT -->
+            <div id="monthly-attendance-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-calendar-days"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">របាយការណ៍ប្រចាំខែ</h3>
+                            <p class="text-xs text-slate-500">ជ្រើសរើសខែ ឆ្នាំ និងវិសាលភាពទិន្នន័យ (មុខវិជ្ជាផ្ទាល់ខ្លួន ឬសរុបទាំងអស់)</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="monthly-scope" onchange="renderMonthlyReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="mine">វត្តមានមុខវិជ្ជារបស់ខ្ញុំ</option>
+                            <option value="all">សរុបគ្រប់មុខវិជ្ជាទាំងអស់</option>
+                        </select>
+                        <input type="month" id="monthly-picker" onchange="renderMonthlyReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <button onclick="exportMonthlyCSV()" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span class="hidden sm:inline">ទាញយក Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-32">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-24 text-center">ភេទ</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-emerald-50 text-emerald-800">វត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-rose-50 text-rose-800">អវត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-amber-50 text-amber-800">សុំច្បាប់</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-purple-50 text-purple-800">មកយឺត</th>
+                                    <th class="py-3 px-4 w-32 text-center">ភាគរយវត្តមាន</th>
+                                </tr>
+                            </thead>
+                            <tbody id="monthly-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: TRIMESTER REPORT -->
+            <div id="trimester-attendance-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">របាយការណ៍សង្ខេបប្រចាំត្រីមាស / ៤ ខែ</h3>
+                            <p class="text-xs text-slate-500">ជ្រើសរើសត្រីមាស និងឆ្នាំសិក្សាដើម្បីមើលស្ថិតិសរុប</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="trimester-scope" onchange="renderTrimesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="mine">វត្តមានមុខវិជ្ជារបស់ខ្ញុំ</option>
+                            <option value="all">សរុបគ្រប់មុខវិជ្ជាទាំងអស់</option>
+                        </select>
+                        <select id="trimester-select" onchange="renderTrimesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="1">ត្រីមាសទី ១ (ខែ ០១ - ០៤)</option>
+                            <option value="2">ត្រីមាសទី ២ (ខែ ០៥ - ០៨)</option>
+                            <option value="3">ត្រីមាសទី ៣ (ខែ ០៩ - ១២)</option>
+                        </select>
+                        <select id="trimester-year-picker" onchange="renderTrimesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="exportTrimesterCSV()" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span class="hidden sm:inline">ទាញយក Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-32">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-24 text-center">ភេទ</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-emerald-50 text-emerald-800">វត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-rose-50 text-rose-800">អវត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-amber-50 text-amber-800">សុំច្បាប់</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-purple-50 text-purple-800">មកយឺត</th>
+                                    <th class="py-3 px-4 w-32 text-center">ភាគរយ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trimester-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: SEMESTER REPORT -->
+            <div id="semester-attendance-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-layer-group"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">របាយការណ៍សង្ខេបប្រចាំឆមាស (៦ ខែ)</h3>
+                            <p class="text-xs text-slate-500">ជ្រើសរើសឆមាសទី ១ ឬទី ២ និងឆ្នាំសិក្សា</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="semester-scope" onchange="renderSemesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="mine">វត្តមានមុខវិជ្ជារបស់ខ្ញុំ</option>
+                            <option value="all">សរុបគ្រប់មុខវិជ្ជាទាំងអស់</option>
+                        </select>
+                        <select id="semester-select" onchange="renderSemesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="1">ឆមាសទី ១ (ខែ ០១ - ០៦)</option>
+                            <option value="2">ឆមាសទី ២ (ខែ ០៧ - ១២)</option>
+                        </select>
+                        <select id="semester-year-picker" onchange="renderSemesterReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="exportSemesterCSV()" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span class="hidden sm:inline">ទាញយក Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-32">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-24 text-center">ភេទ</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-emerald-50 text-emerald-800">វត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-rose-50 text-rose-800">អវត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-amber-50 text-amber-800">សុំច្បាប់</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-purple-50 text-purple-800">មកយឺត</th>
+                                    <th class="py-3 px-4 w-32 text-center">ភាគរយ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="semester-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: YEARLY REPORT -->
+            <div id="yearly-attendance-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4 no-print">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-base">របាយការណ៍ប្រចាំឆ្នាំសិក្សា</h3>
+                            <p class="text-xs text-slate-500">គណនាសរុបវត្តមាន អវត្តមាន សុំច្បាប់ និងមកយឺតពេញ ១ ឆ្នាំស្វ័យប្រវត្តិ</p>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <select id="yearly-scope" onchange="renderYearlyReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <option value="mine">វត្តមានមុខវិជ្ជារបស់ខ្ញុំ</option>
+                            <option value="all">សរុបគ្រប់មុខវិជ្ជាទាំងអស់</option>
+                        </select>
+                        <select id="yearly-picker" onchange="renderYearlyReport()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm font-bold rounded-xl px-3.5 py-2.5 focus:ring-2 focus:ring-indigo-500 outline-none">
+                            <!-- Populated dynamically -->
+                        </select>
+                        <button onclick="exportYearlyCSV()" class="px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-sm">
+                            <i class="fa-solid fa-file-excel"></i>
+                            <span class="hidden sm:inline">ទាញយក Excel</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-16 text-center">ល.រ</th>
+                                    <th class="py-3 px-4 w-32">អត្តលេខ</th>
+                                    <th class="py-3 px-4">ឈ្មោះសិស្ស</th>
+                                    <th class="py-3 px-4 w-24 text-center">ភេទ</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-emerald-50 text-emerald-800">វត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-rose-50 text-rose-800">អវត្តមាន</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-amber-50 text-amber-800">សុំច្បាប់</th>
+                                    <th class="py-3 px-4 w-28 text-center bg-purple-50 text-purple-800">មកយឺត</th>
+                                    <th class="py-3 px-4 w-32 text-center">ភាគរយ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="yearly-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 7: HISTORY PANEL -->
+            <div id="history-panel" class="hidden space-y-4">
+                <div class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base">ប្រវត្តិការស្រង់វត្តមានតាមថ្ងៃ ម៉ោង និងគ្រូមុខវិជ្ជា</h3>
+                        <p class="text-xs text-slate-500">កំណត់ត្រានីមួយៗរក្សាទុកដាច់ដោយឡែកតាមគ្រូមុខវិជ្ជា និងម៉ោងសិក្សា</p>
+                    </div>
+                    <select id="history-scope" onchange="renderHistoryTable()" class="bg-slate-50 border border-slate-200 text-slate-800 text-xs sm:text-sm font-bold rounded-xl px-3.5 py-2 focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="all">បង្ហាញទាំងអស់ក្នុងថ្នាក់</option>
+                        <option value="mine">បង្ហាញតែកំណត់ត្រារបស់ខ្ញុំ</option>
+                    </select>
+                </div>
+
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-100/70 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
+                                    <th class="py-3 px-4 w-14 text-center">ល.រ</th>
+                                    <th class="py-3 px-4">ថ្ងៃខែឆ្នាំ</th>
+                                    <th class="py-3 px-4">ម៉ោង / មុខវិជ្ជា</th>
+                                    <th class="py-3 px-4">គ្រូបង្រៀន</th>
+                                    <th class="py-3 px-4 text-center">វត្តមាន</th>
+                                    <th class="py-3 px-4 text-center w-36">សកម្មភាព</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500 no-print">
+        ប្រព័ន្ធស្រង់វត្តមានសិស្ស &copy; <span id="footer-year"></span> — Admin គ្រប់គ្រងបញ្ជីសិស្សរួម • គ្រូមុខវិជ្ជាស្រង់វត្តមាន
+    </footer>
+
+    <!-- MODAL: ADD CLASS (ADMIN ONLY) -->
+    <div id="add-class-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center z-40 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+            <div class="bg-amber-600 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-user-shield mr-1.5"></i> បង្កើតថ្នាក់រៀនរួមថ្មី (Admin)</h3>
+                <button onclick="closeAddClassModal()" class="text-amber-100 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ឈ្មោះថ្នាក់រៀន</label>
+                    <input type="text" id="new-class-name" placeholder="ឧ. ថ្នាក់ទី ៧ក ឬ ថ្នាក់ ១២B" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">កំណត់ចំណាំ / ឆ្នាំសិក្សា (ស្រេចចិត្ត)</label>
+                    <input type="text" id="new-class-note" placeholder="ឧ. ឆ្នាំសិក្សា ២០២៦-២០២៧" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="closeAddClassModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition">បោះបង់</button>
+                    <button onclick="saveNewClass()" class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-bold transition shadow-sm">រក្សាទុកថ្នាក់</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD / EDIT STUDENT (ADMIN ONLY) -->
+    <div id="student-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center z-40 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+            <div class="bg-indigo-600 px-5 py-4 text-white flex justify-between items-center">
+                <h3 id="student-modal-title" class="font-bold text-base">បន្ថែមសិស្សក្នុងបញ្ជីរួម</h3>
+                <button onclick="closeStudentModal()" class="text-indigo-100 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <input type="hidden" id="edit-student-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">អត្តលេខសិស្ស</label>
+                    <input type="text" id="student-code" placeholder="ឧ. S001" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ឈ្មោះសិស្ស</label>
+                    <input type="text" id="student-name" placeholder="ឧ. ជា សុភា" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 mb-1">ភេទ</label>
+                    <select id="student-gender" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-sm focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="ប្រុស">ប្រុស</option>
+                        <option value="ស្រី">ស្រី</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button onclick="closeStudentModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition">បោះបង់</button>
+                    <button onclick="saveStudent()" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold transition shadow-sm">រក្សាទុក</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: BACKUP / SYNC JSON -->
+    <div id="backup-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs hidden items-center justify-center z-40 p-4">
+        <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-100 overflow-hidden">
+            <div class="bg-indigo-600 px-5 py-4 text-white flex justify-between items-center">
+                <h3 class="font-bold text-base"><i class="fa-solid fa-cloud-arrow-up mr-1.5"></i> បម្រុងទុក ឬផ្ទេរទិន្នន័យ (Backup / Sync)</h3>
+                <button onclick="closeBackupModal()" class="text-indigo-100 hover:text-white text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4 text-sm">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Admin អាចទាញយកឯកសារ <b>.json</b> ដែលមានបញ្ជីថ្នាក់ ឈ្មោះសិស្សរួម និងគណនីគ្រូ ដើម្បីផ្ញើឲ្យគ្រូមុខវិជ្ជាផ្សេង <b>Import</b> ចូលទូរស័ព្ទ ឬកុំព្យូទ័ររបស់គាត់បានភ្លាមៗ។
+                </p>
+                <div class="space-y-3">
+                    <button onclick="exportSystemBackup()" class="w-full py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold text-sm transition flex items-center justify-center gap-2 shadow-xs">
+                        <i class="fa-solid fa-download"></i> ទាញយកឯកសារ Backup (.json)
+                    </button>
+                    <div class="border-t border-slate-200 pt-3">
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">បញ្ចូលឯកសារទិន្នន័យពី Admin (Import .json)</label>
+                        <input type="file" id="import-json-file" accept=".json" onchange="importSystemBackup(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer">
+                    </div>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button onclick="closeBackupModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-bold transition">បិទ</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * SHARED SYSTEM STORAGE ARCHITECTURE
+         * - `tas_users_v2`: Array of user accounts { email, password, name, role: 'admin' | 'teacher', subject }
+         * - `tas_session_email_v2`: Active user email
+         * - `tas_shared_system_v2`: {
+         *      classes: [ { id, name, note, students: [ { id, code, name, gender } ] } ],
+         *      records: [ { id, classId, date, period, teacherEmail, teacherName, teacherSubject, statuses: { [studentId]: status }, updatedAt } ]
+         *   }
+         */
+        const STORAGE_USERS_KEY = 'tas_users_v2';
+        const STORAGE_SESSION_KEY = 'tas_session_email_v2';
+        const STORAGE_SHARED_KEY = 'tas_shared_system_v2';
+
+        let authMode = 'login';
+        let currentUser = null;
+        let sharedState = { classes: [], records: [] };
+        let selectedClassId = '';
+        let currentAttendanceMap = {};
+
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                const now = new Date();
+                document.getElementById('footer-year').textContent = now.getFullYear();
+
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                document.getElementById('attendance-date').value = `${yyyy}-${mm}-${dd}`;
+                document.getElementById('monthly-picker').value = `${yyyy}-${mm}`;
+
+                populateYearSelectors(yyyy);
+                seedInitialAccountsIfEmpty();
+                loadSharedState();
+
+                const savedEmail = localStorage.getItem(STORAGE_SESSION_KEY);
+                if (savedEmail) {
+                    const users = getUsers();
+                    const found = users.find(u => u.email.toLowerCase() === savedEmail.toLowerCase());
+                    if (found) {
+                        loginAsUser(found, false);
+                        return;
+                    }
+                }
+                showAuthView();
+            } catch (err) {
+                console.error('Initialization error:', err);
+                showToast('មានបញ្ហាក្នុងការចាប់ផ្តើមប្រព័ន្ធ', 'error');
+            }
+        });
+
+        function isAdmin() {
+            return currentUser && currentUser.role === 'admin';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const colors = {
+                success: 'bg-emerald-600 text-white border-emerald-700',
+                error: 'bg-rose-600 text-white border-rose-700',
+                info: 'bg-indigo-600 text-white border-indigo-700'
+            };
+            const icons = {
+                success: 'fa-circle-check',
+                error: 'fa-circle-exclamation',
+                info: 'fa-circle-info'
+            };
+            toast.className = `pointer-events-auto flex items-center gap-2.5 px-4 py-3 rounded-xl shadow-lg border text-sm font-bold transition-all duration-300 ${colors[type] || colors.info}`;
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${escapeHtml(message)}</span>`;
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return '';
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function getUsers() {
+            try {
+                return JSON.parse(localStorage.getItem(STORAGE_USERS_KEY) || '[]');
+            } catch {
+                return [];
+            }
+        }
+
+        function saveUsers(list) {
+            localStorage.setItem(STORAGE_USERS_KEY, JSON.stringify(list));
+        }
+
+        function loadSharedState() {
+            try {
+                const raw = localStorage.getItem(STORAGE_SHARED_KEY);
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    sharedState = {
+                        classes: Array.isArray(parsed.classes) ? parsed.classes : [],
+                        records: Array.isArray(parsed.records) ? parsed.records : []
+                    };
+                } else {
+                    sharedState = { classes: [], records: [] };
+                }
+            } catch (e) {
+                console.error('Error loading shared state:', e);
+                sharedState = { classes: [], records: [] };
+            }
+        }
+
+        function persistSharedState() {
+            try {
+                localStorage.setItem(STORAGE_SHARED_KEY, JSON.stringify(sharedState));
+            } catch (e) {
+                console.error('Error saving shared state:', e);
+                showToast('មិនអាចរក្សាទុកទិន្នន័យបានទេ', 'error');
+            }
+        }
+
+        function seedInitialAccountsIfEmpty() {
+            const users = getUsers();
+            let changed = false;
+
+            if (!users.some(u => u.email === 'admin@school.edu.kh')) {
+                users.push({
+                    name: 'អ្នកគ្រប់គ្រងប្រព័ន្ធ (Admin)',
+                    role: 'admin',
+                    subject: 'រដ្ឋបាលសាលា',
+                    email: 'admin@school.edu.kh',
+                    password: 'admin123'
+                });
+                changed = true;
+            }
+            if (!users.some(u => u.email === 'teacher@school.edu.kh')) {
+                users.push({
+                    name: 'លោកគ្រូ សុខ វិចិត្រ',
+                    role: 'teacher',
+                    subject: 'គណិតវិទ្យា',
+                    email: 'teacher@school.edu.kh',
+                    password: 'teacher123'
+                });
+                changed = true;
+            }
+            if (changed) saveUsers(users);
+
+            if (!localStorage.getItem(STORAGE_SHARED_KEY)) {
+                const now = new Date();
+                const yyyy = now.getFullYear();
+                const mm = String(now.getMonth() + 1).padStart(2, '0');
+                const dd = String(now.getDate()).padStart(2, '0');
+                const todayStr = `${yyyy}-${mm}-${dd}`;
+
+                const demoStudents = [
+                    { id: 's1', code: 'S001', name: 'ចាន់ ដារ៉ា', gender: 'ប្រុស' },
+                    { id: 's2', code: 'S002', name: 'សុខ ស្រីមុំ', gender: 'ស្រី' },
+                    { id: 's3', code: 'S003', name: 'ហេង ពិសិដ្ឋ', gender: 'ប្រុស' },
+                    { id: 's4', code: 'S004', name: 'លឹម ចន្ទ្រា', gender: 'ស្រី' },
+                    { id: 's5', code: 'S005', name: 'ផាន រតនា', gender: 'ប្រុស' },
+                    { id: 's6', code: 'S006', name: 'គង់ វណ្ណី', gender: 'ស្រី' },
+                    { id: 's7', code: 'S007', name: 'ម៉ៅ បញ្ញា', gender: 'ប្រុស' },
+                    { id: 's8', code: 'S008', name: 'ទិត្យ សុផា', gender: 'ស្រី' }
+                ];
+
+                const statusMap = {};
+                demoStudents.forEach((st, idx) => {
+                    statusMap[st.id] = idx === 2 ? 'absent' : (idx === 5 ? 'late' : 'present');
+                });
+
+                sharedState = {
+                    classes: [
+                        { id: 'cls_shared_8a', name: 'ថ្នាក់ទី ៨A', note: 'ឆ្នាំសិក្សា ២០២៦', students: demoStudents },
+                        { id: 'cls_shared_9b', name: 'ថ្នាក់ទី ៩B', note: 'វេនព្រឹក', students: [] }
+                    ],
+                    records: [
+                        {
+                            id: 'rec_seed_1',
+                            classId: 'cls_shared_8a',
+                            date: todayStr,
+                            period: 'ម៉ោងទី ១ (គណិតវិទ្យា)',
+                            teacherEmail: 'teacher@school.edu.kh',
+                            teacherName: 'លោកគ្រូ សុខ វិចិត្រ',
+                            teacherSubject: 'គណិតវិទ្យា',
+                            statuses: statusMap,
+                            updatedAt: new Date().toISOString()
+                        }
+                    ]
+                };
+                persistSharedState();
+            }
+        }
+
+        /* ==========================================
+           AUTH / LOGIN / REGISTER
+           ========================================== */
+        function switchAuthTab(mode) {
+            authMode = mode;
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+            const regFields = document.getElementById('register-fields');
+            const title = document.getElementById('auth-form-title');
+            const submitBtn = document.getElementById('auth-submit-btn');
+
+            if (mode === 'login') {
+                loginBtn.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition';
+                regBtn.className = 'flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-800 transition';
+                regFields.classList.add('hidden');
+                title.textContent = 'ចូលប្រើប្រាស់ប្រព័ន្ធ';
+                submitBtn.textContent = 'ចូលគណនី';
+            } else {
+                regBtn.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition';
+                loginBtn.className = 'flex-1 py-2 rounded-lg text-slate-500 hover:text-slate-800 transition';
+                regFields.classList.remove('hidden');
+                title.textContent = 'បង្កើតគណនីថ្មី';
+                submitBtn.textContent = 'ចុះឈ្មោះគណនី';
+                onRegRoleChange();
+            }
+        }
+
+        function onRegRoleChange() {
+            const role = document.getElementById('reg-role').value;
+            const subjWrap = document.getElementById('reg-subject-wrapper');
+            if (role === 'admin') {
+                subjWrap.classList.add('hidden');
+            } else {
+                subjWrap.classList.remove('hidden');
+            }
+        }
+
+        function handleAuthSubmit() {
+            const email = document.getElementById('auth-email').value.trim();
+            const password = document.getElementById('auth-password').value;
+
+            if (!email || !password) {
+                showToast('សូមបំពេញអ៊ីមែល និងពាក្យសម្ងាត់', 'error');
+                return;
+            }
+
+            const users = getUsers();
+
+            if (authMode === 'register') {
+                const role = document.getElementById('reg-role').value;
+                const name = document.getElementById('reg-name').value.trim();
+                const subject = document.getElementById('reg-subject').value.trim();
+
+                if (!name) {
+                    showToast('សូមបញ្ចូលឈ្មោះអ្នកប្រើប្រាស់', 'error');
+                    return;
+                }
+                if (role === 'teacher' && !subject) {
+                    showToast('សូមបញ្ចូលមុខវិជ្ជាបង្រៀន', 'error');
+                    return;
+                }
+
+                if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+                    showToast('អ៊ីមែលនេះមានគណនីរួចហើយ', 'error');
+                    return;
+                }
+
+                const newUser = {
+                    name,
+                    role,
+                    subject: role === 'admin' ? 'អ្នកគ្រប់គ្រង' : subject,
+                    email,
+                    password
+                };
+                users.push(newUser);
+                saveUsers(users);
+                showToast('បង្កើតគណនីបានជោគជ័យ!', 'success');
+                loginAsUser(newUser, true);
+            } else {
+                const found = users.find(
+                    u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
+                );
+                if (!found) {
+                    showToast('អ៊ីមែល ឬពាក្យសម្ងាត់មិនត្រឹមត្រូវ', 'error');
+                    return;
+                }
+                loginAsUser(found, true);
+            }
+        }
+
+        function handleDemoLogin(role) {
+            seedInitialAccountsIfEmpty();
+            loadSharedState();
+            const users = getUsers();
+            const targetEmail = role === 'admin' ? 'admin@school.edu.kh' : 'teacher@school.edu.kh';
+            const user = users.find(u => u.email === targetEmail);
+            if (user) {
+                loginAsUser(user, true);
+            }
+        }
+
+        function loginAsUser(user, notify = false) {
+            currentUser = user;
+            localStorage.setItem(STORAGE_SESSION_KEY, user.email);
+            loadSharedState();
+
+            if (sharedState.classes.length > 0) {
+                if (!sharedState.classes.some(c => c.id === selectedClassId)) {
+                    selectedClassId = sharedState.classes[0].id;
+                }
+            } else {
+                selectedClassId = '';
+            }
+
+            // Default period label with teacher's subject
+            const periodInput = document.getElementById('attendance-period-custom');
+            if (user.role === 'teacher' && user.subject) {
+                periodInput.value = `ម៉ោងទី ១ (${user.subject})`;
+            } else {
+                periodInput.value = 'ម៉ោងទី ១';
+            }
+
+            // Default report scope
+            const defaultScope = isAdmin() ? 'all' : 'mine';
+            ['monthly-scope', 'trimester-scope', 'semester-scope', 'yearly-scope'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = defaultScope;
+            });
+
+            applyRolePermissionsUI();
+            showDashboardView();
+            renderClassSelector();
+            loadAttendanceForDateAndPeriod();
+            renderStudentsTable();
+            renderHistoryTable();
+            renderAllReports();
+
+            if (notify) {
+                const roleLabel = isAdmin() ? 'អ្នកគ្រប់គ្រង (Admin)' : `គ្រូ${user.subject ? ' ' + user.subject : ''}`;
+                showToast(`សូមស្វាគមន៍ ${user.name} — ${roleLabel}`, 'info');
+            }
+        }
+
+        function applyRolePermissionsUI() {
+            const adminClassControls = document.getElementById('admin-class-controls');
+            const adminStudentActions = document.getElementById('admin-student-actions');
+            const teacherReadonlyBadge = document.getElementById('teacher-student-readonly-badge');
+            const actionColHeader = document.getElementById('students-action-col-header');
+            const roleBadge = document.getElementById('role-badge');
+
+            if (isAdmin()) {
+                adminClassControls.classList.remove('hidden');
+                adminStudentActions.classList.remove('hidden');
+                teacherReadonlyBadge.classList.add('hidden');
+                actionColHeader.classList.remove('hidden');
+
+                roleBadge.textContent = 'ADMIN';
+                roleBadge.className = 'text-xs font-bold px-2.5 py-1 rounded-lg bg-amber-400 text-slate-900 shadow-xs';
+                document.getElementById('teacher-display-name').textContent = currentUser.name;
+            } else {
+                adminClassControls.classList.add('hidden');
+                adminStudentActions.classList.add('hidden');
+                teacherReadonlyBadge.classList.remove('hidden');
+                actionColHeader.classList.add('hidden');
+
+                roleBadge.textContent = 'គ្រូមុខវិជ្ជា';
+                roleBadge.className = 'text-xs font-bold px-2.5 py-1 rounded-lg bg-emerald-400 text-slate-900 shadow-xs';
+                document.getElementById('teacher-display-name').textContent =
+                    `${currentUser.name} (${currentUser.subject || 'គ្រូបង្រៀន'})`;
+            }
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            localStorage.removeItem(STORAGE_SESSION_KEY);
+            document.getElementById('auth-password').value = '';
+            showAuthView();
+            showToast('បានចាកចេញពីគណនី', 'info');
+        }
+
+        function showAuthView() {
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('user-info-section').classList.add('hidden');
+        }
+
+        function showDashboardView() {
+            document.getElementById('auth-section').classList.add('hidden');
+            document.getElementById('dashboard-section').classList.remove('hidden');
+            document.getElementById('user-info-section').classList.remove('hidden');
+        }
+
+        /* ==========================================
+           SHARED CLASS MANAGEMENT (ADMIN CREATES, ALL VIEW)
+           ========================================== */
+        function getCurrentClass() {
+            return sharedState.classes.find(c => c.id === selectedClassId) || null;
+        }
+
+        function renderClassSelector() {
+            const select = document.getElementById('class-selector');
+            select.innerHTML = '';
+
+            if (sharedState.classes.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = '';
+                opt.textContent = isAdmin() ? '-- សូមចុចបង្កើតថ្នាក់ថ្មី --' : '-- មិនទាន់មានថ្នាក់រៀន (រង់ចាំ Admin បង្កើត) --';
+                select.appendChild(opt);
+                selectedClassId = '';
+                updateCurrentClassHeader();
+                return;
+            }
+
+            sharedState.classes.forEach(cls => {
+                const opt = document.createElement('option');
+                opt.value = cls.id;
+                const countLabel = `(${cls.students.length} នាក់)`;
+                opt.textContent = cls.note ? `${cls.name} ${countLabel} — ${cls.note}` : `${cls.name} ${countLabel}`;
+                if (cls.id === selectedClassId) {
+                    opt.selected = true;
+                }
+                select.appendChild(opt);
+            });
+            updateCurrentClassHeader();
+        }
+
+        function updateCurrentClassHeader() {
+            const cls = getCurrentClass();
+            const titleEl = document.getElementById('current-class-title');
+            if (cls) {
+                titleEl.textContent = `បញ្ជីស្រង់វត្តមានសិស្ស — ${cls.name} (${cls.students.length} នាក់)`;
+            } else {
+                titleEl.textContent = 'បញ្ជីស្រង់វត្តមានសិស្ស';
+            }
+        }
+
+        function onClassChange() {
+            selectedClassId = document.getElementById('class-selector').value;
+            updateCurrentClassHeader();
+            loadAttendanceForDateAndPeriod();
+            renderStudentsTable();
+            renderHistoryTable();
+            renderAllReports();
+        }
+
+        function openAddClassModal() {
+            if (!isAdmin()) {
+                showToast('មានតែ Admin ទេដែលអាចបង្កើតថ្នាក់រៀនបាន', 'error');
+                return;
+            }
+            document.getElementById('new-class-name').value = '';
+            document.getElementById('new-class-note').value = '';
+            const modal = document.getElementById('add-class-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('new-class-name').focus();
+        }
+
+        function closeAddClassModal() {
+            const modal = document.getElementById('add-class-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveNewClass() {
+            if (!isAdmin()) return;
+            const name = document.getElementById('new-class-name').value.trim();
+            const note = document.getElementById('new-class-note').value.trim();
+
+            if (!name) {
+                showToast('សូមបញ្ចូលឈ្មោះថ្នាក់រៀន', 'error');
+                return;
+            }
+
+            const newClass = {
+                id: 'cls_' + Date.now(),
+                name,
+                note,
+                students: []
+            };
+            sharedState.classes.push(newClass);
+            selectedClassId = newClass.id;
+            persistSharedState();
+
+            closeAddClassModal();
+            renderClassSelector();
+            loadAttendanceForDateAndPeriod();
+            renderStudentsTable();
+            renderHistoryTable();
+            renderAllReports();
+            showToast(`Admin បានបង្កើតថ្នាក់រួម "${name}"`, 'success');
+        }
+
+        function deleteCurrentClass() {
+            if (!isAdmin()) return;
+            const cls = getCurrentClass();
+            if (!cls) return;
+
+            sharedState.classes = sharedState.classes.filter(c => c.id !== cls.id);
+            sharedState.records = sharedState.records.filter(r => r.classId !== cls.id);
+            selectedClassId = sharedState.classes.length > 0 ? sharedState.classes[0].id : '';
+            persistSharedState();
+
+            renderClassSelector();
+            loadAttendanceForDateAndPeriod();
+            renderStudentsTable();
+            renderHistoryTable();
+            renderAllReports();
+            showToast(`បានលុបថ្នាក់ "${cls.name}"`, 'info');
+        }
+
+        /* ==========================================
+           TAB NAVIGATION
+           ========================================== */
+        function switchTab(tabName) {
+            const panels = {
+                attendance: 'attendance-panel',
+                students: 'students-panel',
+                monthly: 'monthly-attendance-panel',
+                trimester: 'trimester-attendance-panel',
+                semester: 'semester-attendance-panel',
+                yearly: 'yearly-attendance-panel',
+                history: 'history-panel'
+            };
+
+            Object.keys(panels).forEach(key => {
+                const panelEl = document.getElementById(panels[key]);
+                const navBtn = document.getElementById(`nav-tab-${key}`);
+                if (key === tabName) {
+                    panelEl.classList.remove('hidden');
+                    navBtn.className = 'px-3.5 py-2 rounded-lg bg-white text-indigo-700 shadow-sm transition';
+                } else {
+                    panelEl.classList.add('hidden');
+                    navBtn.className = 'px-3.5 py-2 rounded-lg text-slate-600 hover:text-slate-800 transition';
+                }
+            });
+
+            if (tabName === 'monthly') renderMonthlyReport();
+            if (tabName === 'trimester') renderTrimesterReport();
+            if (tabName === 'semester') renderSemesterReport();
+            if (tabName === 'yearly') renderYearlyReport();
+            if (tabName === 'history') renderHistoryTable();
+            if (tabName === 'students') renderStudentsTable();
+            if (tabName === 'attendance') loadAttendanceForDateAndPeriod();
+        }
+
+        /* ==========================================
+           SHARED STUDENT MANAGEMENT (ADMIN EDITS, ALL VIEW)
+           ========================================== */
+        function renderStudentsTable() {
+            const cls = getCurrentClass();
+            const tbody = document.getElementById('students-table-body');
+            tbody.innerHTML = '';
+
+            const colSpan = isAdmin() ? 5 : 4;
+
+            if (!cls) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="${colSpan}" class="py-10 text-center text-slate-400">
+                            ${isAdmin() ? 'មិនទាន់មានថ្នាក់រៀនទេ។ សូមចុច "បង្កើតថ្នាក់ថ្មី" ជាមុន។' : 'មិនទាន់មានថ្នាក់រៀនក្នុងប្រព័ន្ធទេ។ សូមរង់ចាំ Admin បង្កើតថ្នាក់ និងបញ្ចូលឈ្មោះសិស្ស។'}
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            if (cls.students.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="${colSpan}" class="py-10 text-center text-slate-400">
+                            ${isAdmin() ? 'មិនទាន់មានសិស្សក្នុងថ្នាក់នេះទេ។ ចុច "បន្ថែមសិស្សថ្មី" ឬ "បញ្ចូលសិស្សគំរូ (១០នាក់)"។' : 'ថ្នាក់នេះមិនទាន់មានឈ្មោះសិស្សទេ។ សូមឲ្យ Admin វាយបញ្ចូលឈ្មោះសិស្សជាមុន។'}
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            cls.students.forEach((stu, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+
+                const adminActionsCell = isAdmin() ? `
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center gap-1.5">
+                            <button onclick="openEditStudentModal('${stu.id}')" title="កែប្រែ" class="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deleteStudent('${stu.id}')" title="លុប" class="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>` : '';
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-indigo-700">${escapeHtml(stu.code)}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(stu.name)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-bold ${stu.gender === 'ស្រី' ? 'bg-pink-50 text-pink-700 border border-pink-200' : 'bg-sky-50 text-sky-700 border border-sky-200'}">
+                            ${escapeHtml(stu.gender)}
+                        </span>
+                    </td>
+                    ${adminActionsCell}
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openAddStudentModal() {
+            if (!isAdmin()) {
+                showToast('មានតែ Admin ទេដែលអាចបន្ថែមឈ្មោះសិស្សបាន', 'error');
+                return;
+            }
+            const cls = getCurrentClass();
+            if (!cls) {
+                showToast('សូមជ្រើសរើស ឬបង្កើតថ្នាក់ជាមុន', 'error');
+                return;
+            }
+            document.getElementById('student-modal-title').textContent = 'បន្ថែមសិស្សក្នុងបញ្ជីរួម (Admin)';
+            document.getElementById('edit-student-id').value = '';
+            const nextNum = String(cls.students.length + 1).padStart(3, '0');
+            document.getElementById('student-code').value = `S${nextNum}`;
+            document.getElementById('student-name').value = '';
+            document.getElementById('student-gender').value = 'ប្រុស';
+
+            const modal = document.getElementById('student-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('student-name').focus();
+        }
+
+        function openEditStudentModal(studentId) {
+            if (!isAdmin()) return;
+            const cls = getCurrentClass();
+            if (!cls) return;
+            const stu = cls.students.find(s => s.id === studentId);
+            if (!stu) return;
+
+            document.getElementById('student-modal-title').textContent = 'កែប្រែព័ត៌មានសិស្ស (Admin)';
+            document.getElementById('edit-student-id').value = stu.id;
+            document.getElementById('student-code').value = stu.code;
+            document.getElementById('student-name').value = stu.name;
+            document.getElementById('student-gender').value = stu.gender;
+
+            const modal = document.getElementById('student-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.getElementById('student-name').focus();
+        }
+
+        function closeStudentModal() {
+            const modal = document.getElementById('student-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function saveStudent() {
+            if (!isAdmin()) return;
+            const cls = getCurrentClass();
+            if (!cls) return;
+
+            const editId = document.getElementById('edit-student-id').value;
+            const code = document.getElementById('student-code').value.trim();
+            const name = document.getElementById('student-name').value.trim();
+            const gender = document.getElementById('student-gender').value;
+
+            if (!name) {
+                showToast('សូមបញ្ចូលឈ្មោះសិស្ស', 'error');
+                return;
+            }
+
+            if (editId) {
+                const stu = cls.students.find(s => s.id === editId);
+                if (stu) {
+                    stu.code = code || stu.code;
+                    stu.name = name;
+                    stu.gender = gender;
+                }
+                showToast('បានកែប្រែឈ្មោះសិស្សក្នុងបញ្ជីរួម', 'success');
+            } else {
+                const newStu = {
+                    id: 'stu_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                    code: code || `S${String(cls.students.length + 1).padStart(3, '0')}`,
+                    name,
+                    gender
+                };
+                cls.students.push(newStu);
+                showToast('បានបន្ថែមសិស្សក្នុងបញ្ជីរួម', 'success');
+            }
+
+            persistSharedState();
+            closeStudentModal();
+            renderClassSelector();
+            renderStudentsTable();
+            loadAttendanceForDateAndPeriod();
+            renderAllReports();
+        }
+
+        function deleteStudent(studentId) {
+            if (!isAdmin()) return;
+            const cls = getCurrentClass();
+            if (!cls) return;
+            cls.students = cls.students.filter(s => s.id !== studentId);
+            persistSharedState();
+            renderClassSelector();
+            renderStudentsTable();
+            loadAttendanceForDateAndPeriod();
+            renderAllReports();
+            showToast('បានលុបសិស្សចេញពីបញ្ជីរួម', 'info');
+        }
+
+        function loadDemoStudents() {
+            if (!isAdmin()) return;
+            const cls = getCurrentClass();
+            if (!cls) return;
+
+            const sampleNames = [
+                { name: 'អ៊ុក សុវណ្ណ', gender: 'ប្រុស' },
+                { name: 'ប៉ែន ម៉ាលី', gender: 'ស្រី' },
+                { name: 'គឹម វិបុល', gender: 'ប្រុស' },
+                { name: 'ឌី ស្រីពេជ្រ', gender: 'ស្រី' },
+                { name: 'ស៊ុន តុលា', gender: 'ប្រុស' },
+                { name: 'វ៉ាន់ កញ្ញា', gender: 'ស្រី' },
+                { name: 'ជា ធារ៉ា', gender: 'ប្រុស' },
+                { name: 'នាង សុខុម', gender: 'ស្រី' },
+                { name: 'រស់ រិទ្ធី', gender: 'ប្រុស' },
+                { name: 'ខាត់ ចរិយា', gender: 'ស្រី' }
+            ];
+
+            const baseIndex = cls.students.length;
+            sampleNames.forEach((item, i) => {
+                const num = String(baseIndex + i + 1).padStart(3, '0');
+                cls.students.push({
+                    id: 'stu_' + Date.now() + '_' + i + '_' + Math.random().toString(36).slice(2, 5),
+                    code: `S${num}`,
+                    name: item.name,
+                    gender: item.gender
+                });
+            });
+
+            persistSharedState();
+            renderClassSelector();
+            renderStudentsTable();
+            loadAttendanceForDateAndPeriod();
+            renderAllReports();
+            showToast('Admin បានបញ្ចូលសិស្សគំរូ ១០ នាក់ក្នុងបញ្ជីរួម', 'success');
+        }
+
+        /* ==========================================
+           ATTENDANCE TAKING (PER CLASS + DATE + PERIOD + USER)
+           ========================================== */
+        function loadAttendanceForDateAndPeriod() {
+            const cls = getCurrentClass();
+            const tbody = document.getElementById('attendance-table-body');
+            const dateVal = document.getElementById('attendance-date').value;
+            const periodVal = document.getElementById('attendance-period-custom').value.trim() || 'ម៉ោងទី ១';
+            const badge = document.getElementById('attendance-status-badge');
+
+            tbody.innerHTML = '';
+            currentAttendanceMap = {};
+
+            if (!cls) {
+                badge.textContent = isAdmin() ? 'សូមបង្កើតថ្នាក់រៀនជាមុន' : 'មិនទាន់មានថ្នាក់រៀនក្នុងប្រព័ន្ធ (រង់ចាំ Admin)';
+                updateAttendanceCounters();
+                return;
+            }
+
+            if (cls.students.length === 0) {
+                badge.textContent = `${cls.name} • ${dateVal} • ${periodVal}`;
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="py-10 text-center text-slate-400">
+                            ${isAdmin() ? 'ថ្នាក់នេះមិនទាន់មានសិស្សទេ។ សូមទៅកាន់ផ្ទាំង "បញ្ជីសិស្សរួម" ដើម្បីបន្ថែមសិស្ស។' : 'ថ្នាក់នេះមិនទាន់មានឈ្មោះសិស្សទេ។ សូមឲ្យ Admin បញ្ចូលឈ្មោះសិស្សជាមុន។'}
+                        </td>
+                    </tr>`;
+                updateAttendanceCounters();
+                return;
+            }
+
+            // Match record by Class + Date + Period + TeacherEmail so different teachers never overwrite each other
+            const existingRecord = sharedState.records.find(
+                r => r.classId === cls.id &&
+                     r.date === dateVal &&
+                     (r.period || '').trim() === periodVal &&
+                     (r.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase()
+            );
+
+            if (existingRecord) {
+                badge.textContent = `បានរក្សាទុករួច • ${cls.name} • ${dateVal} • ${periodVal}`;
+                badge.className = 'text-xs text-emerald-600 font-bold mt-0.5';
+            } else {
+                badge.textContent = `មិនទាន់រក្សាទុក • ${cls.name} • ${dateVal} • ${periodVal}`;
+                badge.className = 'text-xs text-indigo-600 font-semibold mt-0.5';
+            }
+
+            cls.students.forEach((stu, idx) => {
+                const status = (existingRecord && existingRecord.statuses && existingRecord.statuses[stu.id])
+                    ? existingRecord.statuses[stu.id]
+                    : 'present';
+                currentAttendanceMap[stu.id] = status;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-indigo-700">${escapeHtml(stu.code)}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(stu.name)}</td>
+                    <td class="py-3 px-4 text-center text-xs font-bold text-slate-600">${escapeHtml(stu.gender)}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex flex-wrap justify-center gap-1.5" id="status-group-${stu.id}">
+                            ${renderStatusButtons(stu.id, status)}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            updateAttendanceCounters();
+        }
+
+        function renderStatusButtons(studentId, activeStatus) {
+            const options = [
+                { key: 'present', label: 'វត្តមាន', activeCls: 'bg-emerald-600 text-white border-emerald-700 shadow-xs', idleCls: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100' },
+                { key: 'absent', label: 'អវត្តមាន', activeCls: 'bg-rose-600 text-white border-rose-700 shadow-xs', idleCls: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100' },
+                { key: 'permission', label: 'សុំច្បាប់', activeCls: 'bg-amber-500 text-white border-amber-600 shadow-xs', idleCls: 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100' },
+                { key: 'late', label: 'មកយឺត', activeCls: 'bg-purple-600 text-white border-purple-700 shadow-xs', idleCls: 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100' }
+            ];
+
+            return options.map(opt => {
+                const isSelected = activeStatus === opt.key;
+                const cls = isSelected ? opt.activeCls : opt.idleCls;
+                return `<button type="button" onclick="setStudentStatus('${studentId}', '${opt.key}')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold border transition ${cls}">${opt.label}</button>`;
+            }).join('');
+        }
+
+        function setStudentStatus(studentId, status) {
+            currentAttendanceMap[studentId] = status;
+            const group = document.getElementById(`status-group-${studentId}`);
+            if (group) {
+                group.innerHTML = renderStatusButtons(studentId, status);
+            }
+            updateAttendanceCounters();
+        }
+
+        function markAllStatus(status) {
+            const cls = getCurrentClass();
+            if (!cls || cls.students.length === 0) return;
+
+            cls.students.forEach(stu => {
+                currentAttendanceMap[stu.id] = status;
+                const group = document.getElementById(`status-group-${stu.id}`);
+                if (group) {
+                    group.innerHTML = renderStatusButtons(stu.id, status);
+                }
+            });
+            updateAttendanceCounters();
+            showToast('បានកំណត់វត្តមានទាំងអស់', 'info');
+        }
+
+        function updateAttendanceCounters() {
+            let p = 0, a = 0, perm = 0, l = 0;
+            Object.values(currentAttendanceMap).forEach(st => {
+                if (st === 'present') p++;
+                else if (st === 'absent') a++;
+                else if (st === 'permission') perm++;
+                else if (st === 'late') l++;
+            });
+            document.getElementById('count-present').textContent = p;
+            document.getElementById('count-absent').textContent = a;
+            document.getElementById('count-permission').textContent = perm;
+            document.getElementById('count-late').textContent = l;
+        }
+
+        function saveAttendance() {
+            const cls = getCurrentClass();
+            if (!cls) {
+                showToast('សូមជ្រើសរើសថ្នាក់រៀនជាមុន', 'error');
+                return;
+            }
+            if (cls.students.length === 0) {
+                showToast('មិនមានសិស្សដើម្បីរក្សាទុកវត្តមានទេ', 'error');
+                return;
+            }
+
+            const dateVal = document.getElementById('attendance-date').value;
+            const periodVal = document.getElementById('attendance-period-custom').value.trim() || 'ម៉ោងទី ១';
+
+            if (!dateVal) {
+                showToast('សូមជ្រើសរើសកាលបរិច្ឆេទ', 'error');
+                return;
+            }
+
+            const statusesToSave = {};
+            cls.students.forEach(stu => {
+                statusesToSave[stu.id] = currentAttendanceMap[stu.id] || 'present';
+            });
+
+            const existingIndex = sharedState.records.findIndex(
+                r => r.classId === cls.id &&
+                     r.date === dateVal &&
+                     (r.period || '').trim() === periodVal &&
+                     (r.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase()
+            );
+
+            if (existingIndex >= 0) {
+                sharedState.records[existingIndex].statuses = statusesToSave;
+                sharedState.records[existingIndex].teacherName = currentUser.name;
+                sharedState.records[existingIndex].teacherSubject = currentUser.subject || '';
+                sharedState.records[existingIndex].updatedAt = new Date().toISOString();
+            } else {
+                sharedState.records.push({
+                    id: 'rec_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                    classId: cls.id,
+                    date: dateVal,
+                    period: periodVal,
+                    teacherEmail: currentUser.email,
+                    teacherName: currentUser.name,
+                    teacherSubject: currentUser.subject || '',
+                    statuses: statusesToSave,
+                    updatedAt: new Date().toISOString()
+                });
+            }
+
+            persistSharedState();
+            loadAttendanceForDateAndPeriod();
+            renderHistoryTable();
+            renderAllReports();
+            showToast(`បានរក្សាទុកវត្តមាន (${dateVal} • ${periodVal})`, 'success');
+        }
+
+        /* ==========================================
+           HISTORY PANEL
+           ========================================== */
+        function renderHistoryTable() {
+            const cls = getCurrentClass();
+            const tbody = document.getElementById('history-table-body');
+            const scope = document.getElementById('history-scope').value;
+            tbody.innerHTML = '';
+
+            if (!cls) return;
+
+            let classRecords = sharedState.records.filter(r => r.classId === cls.id);
+            if (scope === 'mine') {
+                classRecords = classRecords.filter(
+                    r => (r.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase()
+                );
+            }
+            classRecords.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+            if (classRecords.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="py-10 text-center text-slate-400">
+                            មិនទាន់មានប្រវត្តិស្រង់វត្តមានសម្រាប់ជម្រើសនេះទេ។
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            classRecords.forEach((rec, idx) => {
+                const total = cls.students.length;
+                let presentCount = 0;
+                cls.students.forEach(stu => {
+                    if (rec.statuses && rec.statuses[stu.id] === 'present') {
+                        presentCount++;
+                    }
+                });
+
+                const isOwner = (rec.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase();
+                const canDelete = isAdmin() || isOwner;
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(rec.date)}</td>
+                    <td class="py-3 px-4 font-semibold text-indigo-700">${escapeHtml(rec.period)}</td>
+                    <td class="py-3 px-4 text-xs font-bold text-slate-700">${escapeHtml(rec.teacherName || 'គ្រូបង្រៀន')}</td>
+                    <td class="py-3 px-4 text-center font-bold text-emerald-700">${presentCount} / ${total}</td>
+                    <td class="py-3 px-4 text-center">
+                        <div class="inline-flex items-center gap-1.5">
+                            ${isOwner ? `<button onclick="viewHistoryRecord('${rec.id}')" class="px-2.5 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold border border-indigo-200 transition">បើក/កែ</button>` : ''}
+                            ${canDelete ? `<button onclick="deleteHistoryRecord('${rec.id}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold border border-rose-200 transition">លុប</button>` : '<span class="text-xs text-slate-400">-</span>'}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function viewHistoryRecord(recordId) {
+            const rec = sharedState.records.find(r => r.id === recordId);
+            if (!rec) return;
+
+            selectedClassId = rec.classId;
+            document.getElementById('class-selector').value = rec.classId;
+            document.getElementById('attendance-date').value = rec.date;
+            document.getElementById('attendance-period-custom').value = rec.period;
+
+            switchTab('attendance');
+            showToast(`កំពុងបង្ហាញកំណត់ត្រាថ្ងៃ ${rec.date} (${rec.period})`, 'info');
+        }
+
+        function deleteHistoryRecord(recordId) {
+            const rec = sharedState.records.find(r => r.id === recordId);
+            if (!rec) return;
+            const isOwner = (rec.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase();
+            if (!isAdmin() && !isOwner) {
+                showToast('អ្នកមិនមានសិទ្ធិលុបកំណត់ត្រារបស់គ្រូផ្សេងទេ', 'error');
+                return;
+            }
+
+            sharedState.records = sharedState.records.filter(r => r.id !== recordId);
+            persistSharedState();
+            renderHistoryTable();
+            loadAttendanceForDateAndPeriod();
+            renderAllReports();
+            showToast('បានលុបកំណត់ត្រាវត្តមាន', 'info');
+        }
+
+        /* ==========================================
+           REPORTS (MONTHLY, TRIMESTER, SEMESTER, YEARLY)
+           ========================================== */
+        function populateYearSelectors(currentYear) {
+            const years = [];
+            for (let y = currentYear + 1; y >= currentYear - 5; y--) {
+                years.push(String(y));
+            }
+            const ids = ['trimester-year-picker', 'semester-year-picker', 'yearly-picker'];
+            ids.forEach(id => {
+                const sel = document.getElementById(id);
+                if (!sel) return;
+                sel.innerHTML = '';
+                years.forEach(y => {
+                    const opt = document.createElement('option');
+                    opt.value = y;
+                    opt.textContent = `ឆ្នាំ ${y}`;
+                    if (Number(y) === currentYear) opt.selected = true;
+                    sel.appendChild(opt);
+                });
+            });
+        }
+
+        function filterRecordsByScope(records, scopeSelectId) {
+            const scopeEl = document.getElementById(scopeSelectId);
+            const scope = scopeEl ? scopeEl.value : 'all';
+            if (scope === 'mine' && currentUser) {
+                return records.filter(
+                    r => (r.teacherEmail || '').toLowerCase() === currentUser.email.toLowerCase()
+                );
+            }
+            return records;
+        }
+
+        function computeStatsForRecords(students, filteredRecords) {
+            return students.map(stu => {
+                let present = 0, absent = 0, permission = 0, late = 0;
+                filteredRecords.forEach(rec => {
+                    const st = rec.statuses ? rec.statuses[stu.id] : null;
+                    if (st === 'present') present++;
+                    else if (st === 'absent') absent++;
+                    else if (st === 'permission') permission++;
+                    else if (st === 'late') late++;
+                });
+                const totalSessions = present + absent + permission + late;
+                const percentage = totalSessions > 0 ? ((present / totalSessions) * 100).toFixed(1) : '0.0';
+                return {
+                    student: stu,
+                    present,
+                    absent,
+                    permission,
+                    late,
+                    totalSessions,
+                    percentage
+                };
+            });
+        }
+
+        function renderReportRows(tbodyId, statsList) {
+            const tbody = document.getElementById(tbodyId);
+            tbody.innerHTML = '';
+
+            if (!statsList || statsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="py-10 text-center text-slate-400">
+                            មិនមានទិន្នន័យសិស្ស ឬកំណត់ត្រាសម្រាប់រយៈពេលនេះទេ។
+                        </td>
+                    </tr>`;
+                return;
+            }
+
+            statsList.forEach((item, idx) => {
+                const pctNum = parseFloat(item.percentage);
+                const pctColor = pctNum >= 80
+                    ? 'text-emerald-700 bg-emerald-50 border-emerald-200'
+                    : (pctNum >= 60 ? 'text-amber-700 bg-amber-50 border-amber-200' : 'text-rose-700 bg-rose-50 border-rose-200');
+
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-slate-50/80 transition';
+                tr.innerHTML = `
+                    <td class="py-3 px-4 text-center font-bold text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-mono text-xs font-bold text-indigo-700">${escapeHtml(item.student.code)}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${escapeHtml(item.student.name)}</td>
+                    <td class="py-3 px-4 text-center text-xs font-bold text-slate-600">${escapeHtml(item.student.gender)}</td>
+                    <td class="py-3 px-4 text-center font-bold text-emerald-700 bg-emerald-50/40">${item.present}</td>
+                    <td class="py-3 px-4 text-center font-bold text-rose-700 bg-rose-50/40">${item.absent}</td>
+                    <td class="py-3 px-4 text-center font-bold text-amber-700 bg-amber-50/40">${item.permission}</td>
+                    <td class="py-3 px-4 text-center font-bold text-purple-700 bg-purple-50/40">${item.late}</td>
+                    <td class="py-3 px-4 text-center">
+                        <span class="px-2.5 py-1 rounded-lg text-xs font-bold border ${pctColor}">${item.percentage}%</span>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function getMonthlyFilteredRecords() {
+            const cls = getCurrentClass();
+            const ym = document.getElementById('monthly-picker').value;
+            if (!cls || !ym) return [];
+            const base = sharedState.records.filter(r => r.classId === cls.id && (r.date || '').startsWith(ym));
+            return filterRecordsByScope(base, 'monthly-scope');
+        }
+
+        function renderMonthlyReport() {
+            const cls = getCurrentClass();
+            if (!cls) return renderReportRows('monthly-table-body', []);
+            renderReportRows('monthly-table-body', computeStatsForRecords(cls.students, getMonthlyFilteredRecords()));
+        }
+
+        function getTrimesterFilteredRecords() {
+            const cls = getCurrentClass();
+            const tri = Number(document.getElementById('trimester-select').value);
+            const year = document.getElementById('trimester-year-picker').value;
+            if (!cls) return [];
+
+            const monthRanges = {
+                1: ['01', '02', '03', '04'],
+                2: ['05', '06', '07', '08'],
+                3: ['09', '10', '11', '12']
+            };
+            const months = monthRanges[tri] || [];
+
+            const base = sharedState.records.filter(r => {
+                if (r.classId !== cls.id || !r.date) return false;
+                const parts = r.date.split('-');
+                return parts[0] === year && months.includes(parts[1]);
+            });
+            return filterRecordsByScope(base, 'trimester-scope');
+        }
+
+        function renderTrimesterReport() {
+            const cls = getCurrentClass();
+            if (!cls) return renderReportRows('trimester-table-body', []);
+            renderReportRows('trimester-table-body', computeStatsForRecords(cls.students, getTrimesterFilteredRecords()));
+        }
+
+        function getSemesterFilteredRecords() {
+            const cls = getCurrentClass();
+            const sem = Number(document.getElementById('semester-select').value);
+            const year = document.getElementById('semester-year-picker').value;
+            if (!cls) return [];
+
+            const months = sem === 1
+                ? ['01', '02', '03', '04', '05', '06']
+                : ['07', '08', '09', '10', '11', '12'];
+
+            const base = sharedState.records.filter(r => {
+                if (r.classId !== cls.id || !r.date) return false;
+                const parts = r.date.split('-');
+                return parts[0] === year && months.includes(parts[1]);
+            });
+            return filterRecordsByScope(base, 'semester-scope');
+        }
+
+        function renderSemesterReport() {
+            const cls = getCurrentClass();
+            if (!cls) return renderReportRows('semester-table-body', []);
+            renderReportRows('semester-table-body', computeStatsForRecords(cls.students, getSemesterFilteredRecords()));
+        }
+
+        function getYearlyFilteredRecords() {
+            const cls = getCurrentClass();
+            const year = document.getElementById('yearly-picker').value;
+            if (!cls || !year) return [];
+            const base = sharedState.records.filter(r => r.classId === cls.id && (r.date || '').startsWith(year + '-'));
+            return filterRecordsByScope(base, 'yearly-scope');
+        }
+
+        function renderYearlyReport() {
+            const cls = getCurrentClass();
+            if (!cls) return renderReportRows('yearly-table-body', []);
+            renderReportRows('yearly-table-body', computeStatsForRecords(cls.students, getYearlyFilteredRecords()));
+        }
+
+        function renderAllReports() {
+            renderMonthlyReport();
+            renderTrimesterReport();
+            renderSemesterReport();
+            renderYearlyReport();
+        }
+
+        /* ==========================================
+           CSV / EXCEL EXPORT
+           ========================================== */
+        function exportStatsToCSV(statsList, filenamePrefix) {
+            const cls = getCurrentClass();
+            if (!cls || !statsList || statsList.length === 0) {
+                showToast('មិនមានទិន្នន័យសម្រាប់ទាញយកទេ', 'error');
+                return;
+            }
+
+            const headers = ['ល.រ', 'អត្តលេខ', 'ឈ្មោះសិស្ស', 'ភេទ', 'វត្តមាន', 'អវត្តមាន', 'សុំច្បាប់', 'មកយឺត', 'ភាគរយវត្តមាន'];
+            const rows = statsList.map((item, idx) => [
+                idx + 1,
+                item.student.code,
+                item.student.name,
+                item.student.gender,
+                item.present,
+                item.absent,
+                item.permission,
+                item.late,
+                `${item.percentage}%`
+            ]);
+
+            const csvContent = [headers, ...rows]
+                .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+                .join('\r\n');
+
+            const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const safeClassName = cls.name.replace(/\s+/g, '_');
+            link.href = url;
+            link.download = `${filenamePrefix}_${safeClassName}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            showToast('បានទាញយករបាយការណ៍ Excel (CSV)', 'success');
+        }
+
+        function exportMonthlyCSV() {
+            const cls = getCurrentClass();
+            if (!cls) return;
+            const ym = document.getElementById('monthly-picker').value || 'month';
+            exportStatsToCSV(computeStatsForRecords(cls.students, getMonthlyFilteredRecords()), `Monthly_${ym}`);
+        }
+
+        function exportTrimesterCSV() {
+            const cls = getCurrentClass();
+            if (!cls) return;
+            const tri = document.getElementById('trimester-select').value;
+            const year = document.getElementById('trimester-year-picker').value;
+            exportStatsToCSV(computeStatsForRecords(cls.students, getTrimesterFilteredRecords()), `Trimester_${tri}_${year}`);
+        }
+
+        function exportSemesterCSV() {
+            const cls = getCurrentClass();
+            if (!cls) return;
+            const sem = document.getElementById('semester-select').value;
+            const year = document.getElementById('semester-year-picker').value;
+            exportStatsToCSV(computeStatsForRecords(cls.students, getSemesterFilteredRecords()), `Semester_${sem}_${year}`);
+        }
+
+        function exportYearlyCSV() {
+            const cls = getCurrentClass();
+            if (!cls) return;
+            const year = document.getElementById('yearly-picker').value;
+            exportStatsToCSV(computeStatsForRecords(cls.students, getYearlyFilteredRecords()), `Yearly_${year}`);
+        }
+
+        /* ==========================================
+           BACKUP / SYNC JSON ACROSS DEVICES
+           ========================================== */
+        function openBackupModal() {
+            document.getElementById('import-json-file').value = '';
+            const modal = document.getElementById('backup-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeBackupModal() {
+            const modal = document.getElementById('backup-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function exportSystemBackup() {
+            try {
+                const payload = {
+                    version: 2,
+                    exportedAt: new Date().toISOString(),
+                    users: getUsers(),
+                    sharedState: sharedState
+                };
+                const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                const dateTag = new Date().toISOString().slice(0, 10);
+                link.href = url;
+                link.download = `Attendance_Shared_Backup_${dateTag}.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                showToast('បានទាញយកឯកសារ Backup (.json) រួចរាល់', 'success');
+            } catch (e) {
+                console.error(e);
+                showToast('បរាជ័យក្នុងការទាញយក Backup', 'error');
+            }
+        }
+
+        function importSystemBackup(event) {
+            const file = event.target.files && event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (!parsed || !parsed.sharedState || !Array.isArray(parsed.sharedState.classes)) {
+                        showToast('ទម្រង់ឯកសារ Backup មិនត្រឹមត្រូវទេ', 'error');
+                        return;
+                    }
+
+                    // Merge users without duplicates
+                    if (Array.isArray(parsed.users)) {
+                        const existingUsers = getUsers();
+                        parsed.users.forEach(u => {
+                            if (u.email && !existingUsers.some(eu => eu.email.toLowerCase() === u.email.toLowerCase())) {
+                                existingUsers.push(u);
+                            }
+                        });
+                        saveUsers(existingUsers);
+                    }
+
+                    sharedState = {
+                        classes: parsed.sharedState.classes,
+                        records: Array.isArray(parsed.sharedState.records) ? parsed.sharedState.records : []
+                    };
+                    persistSharedState();
+
+                    if (sharedState.classes.length > 0) {
+                        selectedClassId = sharedState.classes[0].id;
+                    }
+
+                    renderClassSelector();
+                    loadAttendanceForDateAndPeriod();
+                    renderStudentsTable();
+                    renderHistoryTable();
+                    renderAllReports();
+                    closeBackupModal();
+                    showToast('បានបញ្ចូលបញ្ជីថ្នាក់ និងឈ្មោះសិស្សរួមដោយជោគជ័យ!', 'success');
+                } catch (err) {
+                    console.error(err);
+                    showToast('មានបញ្ហាក្នុងការអានឯកសារ JSON', 'error');
+                }
+            };
+            reader.readAsText(file);
+        }
+    </script>
+</body>
+</html>
